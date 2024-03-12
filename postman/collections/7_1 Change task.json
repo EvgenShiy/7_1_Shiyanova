@@ -106,6 +106,7 @@
 				{
 					"listen": "test",
 					"script": {
+						"id": "0df3ef37-55e9-41b1-a4fc-6389602caaf9",
 						"exec": [
 							"let jsonData = pm.response.json();",
 							"",
@@ -116,10 +117,28 @@
 							"",
 							"pm.environment.set(\"task_id\", jsonData.id)",
 							"",
-							""
+							"//статус-код ответа",
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"//статус-сообщение ответа",
+							"pm.test(\"Task has been created successfully\", function () {",
+							"    pm.response.to.have.status(\"Task has been created successfully\");",
+							"});",
+							"",
+							"//критичное содержимое тела ответа",
+							"pm.test(\"Check Response Body\", function () {",
+							"    var expectedFields = [\"id\", \"text\", \"answer\", \"title\"];",
+							"});",
+							"",
+							"//2-3 критичных заголовка ответа",
+							"pm.test(\"Content-Type is application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
+							"});"
 						],
 						"type": "text/javascript",
-						"id": "0df3ef37-55e9-41b1-a4fc-6389602caaf9"
+						"packages": {}
 					}
 				}
 			],
@@ -161,6 +180,38 @@
 		},
 		{
 			"name": "get tasks list",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "798ddabd-4a9d-4e35-9bde-6c1ec42c0bf3",
+						"exec": [
+							"//статус-код ответа\r",
+							"pm.test(\"Response Status Code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"//статус-сообщение ответа\r",
+							"pm.test(\"Task information\", function () {\r",
+							"    pm.response.to.have.status(\"Task information\");\r",
+							"});\r",
+							"\r",
+							"//2-3 критичных заголовка ответа\r",
+							"pm.test(\"Content-Type is application/json\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+							"});\r",
+							"\r",
+							"//критичное содержимое тела ответа\r",
+							"pm.test(\"Check Response Body\", function () {\r",
+							"    var expectedFields = [\"id\", \"text\", \"answer\", \"title\"]    \r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"id": "f1d3e606-514b-4c36-9af8-1707b5032ffb",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -201,6 +252,38 @@
 		},
 		{
 			"name": "change task text",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "11645e76-d26a-458e-8ee7-f5b5354ce811",
+						"exec": [
+							"//статус-код ответа\r",
+							"pm.test(\"Response Status Code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"//статус-сообщение ответа\r",
+							"pm.test(\"Task update\", function () {\r",
+							"    pm.response.to.have.status(\"Task update\");\r",
+							"});\r",
+							"\r",
+							"//2-3 критичных заголовка ответа\r",
+							"pm.test(\"Content-Type is application/json\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");\r",
+							"});\r",
+							"\r",
+							"//критичное содержимое тела ответа\r",
+							"pm.test(\"Check Response Body\", function () {\r",
+							"    var expectedFields = [\"id\", \"text\", \"answer\", \"title\"]    \r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"id": "07f67153-eb42-4d4b-b527-adf248957222",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
@@ -244,7 +327,28 @@
 				{
 					"listen": "test",
 					"script": {
+						"id": "2747b1d0-8a30-40a5-b138-c638335eada3",
 						"exec": [
+							"//статус-код ответа",
+							"pm.test(\"Response Status Code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"//статус-сообщение ответа",
+							"pm.test(\"Task information\", function () {",
+							"    pm.response.to.have.status(\"Task information\");",
+							"});",
+							"",
+							"//2-3 критичных заголовка ответа",
+							"pm.test(\"Content-Type is application/json\", function () {",
+							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
+							"});",
+							"",
+							"//критичное содержимое тела ответа",
+							"pm.test(\"Check Response Body\", function () {",
+							"    var expectedFields = [\"id\", \"text\", \"answer\", \"title\"]    ",
+							"});",
+							"",
 							"pm.sendRequest(",
 							"    {url: 'https://sqlverifier-50d286d70656.herokuapp.com/api/tasks/3070',",
 							"    method: 'DELETE',",
@@ -258,7 +362,7 @@
 							""
 						],
 						"type": "text/javascript",
-						"id": "2747b1d0-8a30-40a5-b138-c638335eada3"
+						"packages": {}
 					}
 				}
 			],
