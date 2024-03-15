@@ -109,35 +109,29 @@
 						"id": "0df3ef37-55e9-41b1-a4fc-6389602caaf9",
 						"exec": [
 							"let jsonData = pm.response.json();",
+							"pm.environment.set(\"task_id\", jsonData.id);",
 							"",
-							"",
-							"pm.test(\"Your test name\", function () {",
-							"    pm.expect(jsonData.text).to.eql(\"some text\");",
-							"});",
-							"",
-							"pm.environment.set(\"task_id\", jsonData.id)",
-							"",
-							"//статус-код ответа",
+							"// Проверка статус-кода ответа",
 							"pm.test(\"Status code is 201\", function () {",
 							"    pm.response.to.have.status(201);",
 							"});",
 							"",
-							"//статус-сообщение ответа",
+							"// Проверка статус-сообщения ответа",
 							"pm.test(\"Task has been created successfully\", function () {",
-							"    pm.response.to.have.status(\"Task has been created successfully\");",
+							"    pm.expect(pm.response.status).to.eql(\"Task has been created successfully\");",
 							"});",
 							"",
-							"//критичное содержимое тела ответа",
+							"// Проверка критичного содержимого тела ответа",
 							"pm.test(\"Check Response Body\", function () {",
 							"    var expectedFields = [\"id\", \"text\", \"answer\", \"title\"];",
+							"    pm.expect(jsonData).to.have.all.keys(expectedFields);",
 							"});",
 							"",
-							"//2-3 критичных заголовка ответа",
+							"// Проверка заголовка Content-Type",
 							"pm.test(\"Content-Type is application/json\", function () {",
 							"    pm.response.to.have.header(\"Content-Type\", \"application/json\");",
 							"});",
 							"",
-							"//подгружаем библиотеку moment",
 							"let moment = require('moment');",
 							"",
 							"//получаем текущую дату",
@@ -147,6 +141,11 @@
 							"var momentResponseDate = moment.utc(responseDate);",
 							"var responseDate = pm.response.headers.get(\"Date\");",
 							"console.log(\"Response Date (GMT):\", momentResponseDate.format(\"YYYY-MM-DD HH:mm\"));",
+							"",
+							"//сравниваем текущую дату и дату из ответа",
+							"pm.test(\"Check if response date matches current date\", function () {",
+							"    pm.expect(momentResponseDate.isSame(currentDate, 'day')).to.be.true;",
+							"});",
 							"",
 							"//сравниваем текущую дату и дату из ответа",
 							"pm.test(\"Check if response date matches current date\", function () {",
@@ -170,6 +169,51 @@
 							"    // Проверяем, что дата в заголовке ответа соответствует текущей дате",
 							"    expect(responseDate.toDateString()).to.equal(currentDate.toDateString());",
 							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "c7553e44-35f0-4ac7-a4be-a8a802e7001a",
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: 'https://sqlverifier-staging-08050d656f7a.herokuapp.com/api/authenticate',\r",
+							"    method: 'POST',\r",
+							"    header: {\r",
+							"        'Accept': 'application/json, text/plain, */*',\r",
+							"        'Accept-Language': 'en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7,fr-FR;q=0.6,fr;q=0.5,de-DE;q=0.4,de;q=0.3,ru;q=0.2',\r",
+							"        'Content-Type': 'application/json',\r",
+							"        'Origin': 'https://sqlverifier-50d286d70656.herokuapp.com',\r",
+							"        'Referer': 'https://sqlverifier-50d286d70656.herokuapp.com/login',\r",
+							"        'Sec-Fetch-Dest': 'empty',\r",
+							"        'Sec-Fetch-Mode': 'cors',\r",
+							"        'Sec-Fetch-Site': 'same-origin',\r",
+							"        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',\r",
+							"        'sec-ch-ua': '\"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"',\r",
+							"        'sec-ch-ua-mobile': '?0',\r",
+							"        'sec-ch-ua-platform': '\"macOS\"'\r",
+							"    },\r",
+							"    body: {\r",
+							"        mode: 'raw',\r",
+							"        raw: JSON.stringify({\r",
+							"            \"username\": \"evgen_shiy\",\r",
+							"            \"password\": \"123456789qwerty\",\r",
+							"            \"rememberMe\": false\r",
+							"        })\r",
+							"    }\r",
+							"}, function (err, response) {\r",
+							"    if (err) {\r",
+							"        console.error('Authentication failed:', err);\r",
+							"    } else {\r",
+							"        // Получаем токен из ответа\r",
+							"        let jsonData = response.json();\r",
+							"        pm.environment.set('token', jsonData.id_token);\r",
+							"    }\r",
+							"});\r",
+							""
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -507,6 +551,10 @@
 							"    , function (err, response) {",
 							"    console.log(response);",
 							"});",
+							"",
+							"pm.environment.unset(\"accessToken\");",
+							"pm.environment.unset(\"task_id\");",
+							"",
 							""
 						],
 						"type": "text/javascript",
@@ -549,7 +597,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "{{token}}",
+				"value": "",
 				"type": "string"
 			}
 		]
@@ -558,21 +606,21 @@
 		{
 			"listen": "prerequest",
 			"script": {
+				"id": "e606d8a7-8b17-4a16-88a8-bcf918e2b40c",
 				"type": "text/javascript",
 				"exec": [
 					""
-				],
-				"id": "428e3610-a21e-432c-84e9-d77a4db5082e"
+				]
 			}
 		},
 		{
 			"listen": "test",
 			"script": {
+				"id": "6d5e57da-b1b8-4b04-9c28-43070fd8cc5e",
 				"type": "text/javascript",
 				"exec": [
 					""
-				],
-				"id": "3f58e852-752c-40fd-b970-22d87424b393"
+				]
 			}
 		}
 	]
