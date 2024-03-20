@@ -7,100 +7,6 @@
 	},
 	"item": [
 		{
-			"name": "login",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"let jsonData = pm.response.json();",
-							"pm.environment.set('token', jsonData.id_token)"
-						],
-						"type": "text/javascript",
-						"id": "28779da6-de7e-4a0e-b644-dc87ea4fc9ea"
-					}
-				}
-			],
-			"id": "d113bca2-e39a-4171-aa0c-90b96de91615",
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [
-					{
-						"key": "Accept",
-						"value": "application/json, text/plain, */*"
-					},
-					{
-						"key": "Accept-Language",
-						"value": "en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7,fr-FR;q=0.6,fr;q=0.5,de-DE;q=0.4,de;q=0.3,ru;q=0.2"
-					},
-					{
-						"key": "Connection",
-						"value": "keep-alive"
-					},
-					{
-						"key": "Content-Type",
-						"value": "application/json"
-					},
-					{
-						"key": "Origin",
-						"value": "https://sqlverifier-50d286d70656.herokuapp.com"
-					},
-					{
-						"key": "Referer",
-						"value": "https://sqlverifier-50d286d70656.herokuapp.com/login"
-					},
-					{
-						"key": "Sec-Fetch-Dest",
-						"value": "empty"
-					},
-					{
-						"key": "Sec-Fetch-Mode",
-						"value": "cors"
-					},
-					{
-						"key": "Sec-Fetch-Site",
-						"value": "same-origin"
-					},
-					{
-						"key": "User-Agent",
-						"value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-					},
-					{
-						"key": "sec-ch-ua",
-						"value": "\"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\""
-					},
-					{
-						"key": "sec-ch-ua-mobile",
-						"value": "?0"
-					},
-					{
-						"key": "sec-ch-ua-platform",
-						"value": "\"macOS\""
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\"username\":\"{{adminLogin}}\",\"password\":\"{{adminPassword}}\",\"rememberMe\":false}"
-				},
-				"url": {
-					"raw": "{{baseUrl}}/authenticate",
-					"host": [
-						"{{baseUrl}}"
-					],
-					"path": [
-						"authenticate"
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "create a task",
 			"event": [
 				{
@@ -179,38 +85,34 @@
 					"script": {
 						"id": "c7553e44-35f0-4ac7-a4be-a8a802e7001a",
 						"exec": [
+							"// Получаем имя пользователя и пароль из переменных окружения\r",
+							"var username = pm.variables.get('adminLogin');\r",
+							"var password = pm.variables.get('adminPassword');\r",
+							"\r",
+							"// Отправляем запрос на аутентификацию с использованием переменных\r",
 							"pm.sendRequest({\r",
 							"    url: 'https://sqlverifier-staging-08050d656f7a.herokuapp.com/api/authenticate',\r",
 							"    method: 'POST',\r",
 							"    header: {\r",
-							"        'Accept': 'application/json, text/plain, */*',\r",
-							"        'Accept-Language': 'en-US,en;q=0.9,it-IT;q=0.8,it;q=0.7,fr-FR;q=0.6,fr;q=0.5,de-DE;q=0.4,de;q=0.3,ru;q=0.2',\r",
-							"        'Content-Type': 'application/json',\r",
-							"        'Origin': 'https://sqlverifier-50d286d70656.herokuapp.com',\r",
-							"        'Referer': 'https://sqlverifier-50d286d70656.herokuapp.com/login',\r",
-							"        'Sec-Fetch-Dest': 'empty',\r",
-							"        'Sec-Fetch-Mode': 'cors',\r",
-							"        'Sec-Fetch-Site': 'same-origin',\r",
-							"        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',\r",
-							"        'sec-ch-ua': '\"Google Chrome\";v=\"119\", \"Chromium\";v=\"119\", \"Not?A_Brand\";v=\"24\"',\r",
-							"        'sec-ch-ua-mobile': '?0',\r",
-							"        'sec-ch-ua-platform': '\"macOS\"'\r",
+							"        'Content-Type': 'application/json'\r",
 							"    },\r",
 							"    body: {\r",
 							"        mode: 'raw',\r",
 							"        raw: JSON.stringify({\r",
-							"            \"username\": \"evgen_shiy\",\r",
-							"            \"password\": \"123456789qwerty\",\r",
+							"            \"username\": username,\r",
+							"            \"password\": password,\r",
 							"            \"rememberMe\": false\r",
 							"        })\r",
 							"    }\r",
-							"}, function (err, response) {\r",
+							"}, function (err, res) {\r",
 							"    if (err) {\r",
-							"        console.error('Authentication failed:', err);\r",
+							"        console.error('Ошибка в запросе на логин:', err);\r",
 							"    } else {\r",
-							"        // Получаем токен из ответа\r",
-							"        let jsonData = response.json();\r",
-							"        pm.environment.set('token', jsonData.id_token);\r",
+							"        // Если запрос на логин успешен, получаем токен доступа\r",
+							"        var token = res.json().id_token;\r",
+							"        // Устанавливаем токен в переменную окружения\r",
+							"        pm.environment.set('accessToken', token);\r",
+							"        console.log('Токен доступа успешно установлен:', token);\r",
 							"    }\r",
 							"});\r",
 							""
@@ -225,6 +127,16 @@
 				"disableBodyPruning": true
 			},
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{accessToken}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "POST",
 				"header": [
 					{
@@ -542,10 +454,10 @@
 							"});",
 							"",
 							"pm.sendRequest(",
-							"    {url: 'https://sqlverifier-50d286d70656.herokuapp.com/api/tasks/3070',",
+							"    {url: 'https://sqlverifier-staging-08050d656f7a.herokuapp.com/api/tasks/41012',",
 							"    method: 'DELETE',",
 							"    header:",
-							"    {'Authorization': 'Bearer ' + pm.environment.get('token'),",
+							"    {'Authorization': 'Bearer ' + pm.environment.get('accessToken'),",
 							"    'accept': '*/*'}",
 							"    }",
 							"    , function (err, response) {",
@@ -597,7 +509,7 @@
 		"bearer": [
 			{
 				"key": "token",
-				"value": "",
+				"value": "{{accessToken}}",
 				"type": "string"
 			}
 		]
@@ -606,7 +518,7 @@
 		{
 			"listen": "prerequest",
 			"script": {
-				"id": "e606d8a7-8b17-4a16-88a8-bcf918e2b40c",
+				"id": "064985c8-13a5-4be0-a9e7-817ff0aff903",
 				"type": "text/javascript",
 				"exec": [
 					""
@@ -616,7 +528,7 @@
 		{
 			"listen": "test",
 			"script": {
-				"id": "6d5e57da-b1b8-4b04-9c28-43070fd8cc5e",
+				"id": "f49e4cf9-8c01-4c33-9046-c1ad30b40568",
 				"type": "text/javascript",
 				"exec": [
 					""
